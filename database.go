@@ -109,6 +109,14 @@ func (d *Database) save() {
 	d.writer.Write(string(bytes))
 }
 
+func searchDocuments(query map[string]interface{}, documents []interface{}) {
+	// TODO
+}
+
+func matchValues(queryValue interface{}, documentValue interface{}) {
+	// TODO
+}
+
 func parseDatabaseStorage(content string) ([]interface{}, error) {
 	documents := []interface{}{}
 	err := json.Unmarshal([]byte(content), &documents)
