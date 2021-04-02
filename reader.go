@@ -23,15 +23,3 @@ func (r *Reader) read(path string) string {
 	bytes, err := ioutil.ReadFile(path)
 	return string(bytes)
 }
-
-func exists(path string) bool {
-	return false
-}
-
-func ensureFile(path string, data string) {
-
-}
-
-func ensureDir(path string) {
-
-}
