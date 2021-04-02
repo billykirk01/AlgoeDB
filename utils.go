@@ -17,3 +17,16 @@ func isString(value interface{}) bool {
 		return false
 	}
 }
+
+func isBoolean(value interface{}) bool {
+	switch value.(type) {
+	case bool:
+		return true
+	default:
+		return false
+	}
+}
+
+func isNil(value interface{}) bool {
+	return value == nil
+}
