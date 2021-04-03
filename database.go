@@ -3,7 +3,9 @@ package AlgoeDB
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"reflect"
 )
 
 type Database struct {
@@ -109,8 +111,24 @@ func (d *Database) save() {
 	d.writer.Write(string(bytes))
 }
 
-func searchDocuments(query map[string]interface{}, documents []interface{}) {
+func (d *Database) drop() {
+	d.documents = []interface{}{}
+	if *d.config.OnlyInMemory {
+		d.save()
+	}
+}
+
+func SearchDocuments(query map[string]interface{}, documents []interface{}) {
+
 	// TODO
+	for _, v := range query {
+
+		if reflect.TypeOf(v).Kind() == reflect.Func {
+			queryFunc := reflect.ValueOf(v).Interface().(QueryFunc)
+			fmt.Println(queryFunc(1))
+		}
+
+	}
 }
 
 func matchValues(queryValue interface{}, documentValue interface{}) {
