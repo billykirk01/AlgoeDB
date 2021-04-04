@@ -1,6 +1,8 @@
 package AlgoeDB
 
-import "reflect"
+import (
+	"reflect"
+)
 
 func IsNumber(value interface{}) bool {
 	switch value.(type) {
@@ -23,8 +25,17 @@ func IsNil(value interface{}) bool {
 	return value == nil
 }
 
-type QueryFunc func(value int) bool
-
 func IsFunction(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Func
+}
+
+func MoreThan(value float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target > value
+		}
+
+		return false
+	}
 }

@@ -3,15 +3,18 @@ package AlgoeDB
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"reflect"
+	"sync"
 )
 
 type Database struct {
-	documents []interface{}
-	writer    Writer
 	config    DatabaseConfig
+	mu        sync.Mutex
+	documents []map[string]interface{}
+	writer    Writer
 }
 
 type DatabaseConfig struct {
@@ -24,6 +27,8 @@ type DatabaseConfig struct {
 }
 
 type SchemaValidator func(document interface{}) bool
+
+type QueryFunc func(value interface{}) bool
 
 func NewDatabase(config *DatabaseConfig) (*Database, error) {
 
@@ -52,7 +57,7 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 		return nil, errors.New("It is impossible to disable onlyInMemory mode if the path is not specified")
 	}
 
-	documents := []interface{}{}
+	documents := []map[string]interface{}{}
 
 	writer := Writer{Path: config.Path}
 
@@ -69,30 +74,57 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 	return &database, nil
 }
 
-func (d *Database) InsertOne(document interface{}) {
+func (d *Database) InsertOne(document map[string]interface{}) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	d.documents = append(d.documents, document)
-	if *d.config.OnlyInMemory == false {
+
+	if !*d.config.OnlyInMemory {
 		d.save()
 	}
 }
 
-func (d *Database) InsertMany(documents []interface{}) {
+func (d *Database) InsertMany(documents []map[string]interface{}) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	for _, document := range documents {
 		d.documents = append(d.documents, document)
 	}
 
-	if *d.config.OnlyInMemory == false {
+	if !*d.config.OnlyInMemory {
 		d.save()
 	}
 }
 
-func (d *Database) load() {
-	if d.config.Path == "" {
-		return
+func (d *Database) FindOne(query map[string]interface{}) map[string]interface{} {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) > 0 {
+		return d.documents[found[0]]
 	}
 
-	reader := Reader{}
-	content := reader.read(d.config.Path)
+	return nil
+}
+
+func (d *Database) load() {
+
+	content := "[]"
+
+	if d.config.Path != "" {
+		f, err := os.Open(d.config.Path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		bytes, err := ioutil.ReadFile(d.config.Path)
+		content = string(bytes)
+		f.Close()
+	}
 
 	documents, err := parseDatabaseStorage(content)
 	if err != nil {
@@ -112,31 +144,60 @@ func (d *Database) save() {
 }
 
 func (d *Database) drop() {
-	d.documents = []interface{}{}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.documents = []map[string]interface{}{}
+
 	if *d.config.OnlyInMemory {
 		d.save()
 	}
 }
 
-func SearchDocuments(query map[string]interface{}, documents []interface{}) {
+func searchDocuments(query map[string]interface{}, documents []map[string]interface{}) []int {
 
-	// TODO
-	for _, v := range query {
+	found := []int{}
 
-		if reflect.TypeOf(v).Kind() == reflect.Func {
-			queryFunc := reflect.ValueOf(v).Interface().(QueryFunc)
-			fmt.Println(queryFunc(1))
+	for index, document := range documents {
+
+		include := true
+
+		for key, queryValue := range query {
+			if !include {
+				break
+			}
+
+			documentValue := document[key]
+
+			if !matchValues(queryValue, documentValue) {
+				include = false
+			}
 		}
 
+		if include {
+			found = append(found, index)
+		}
 	}
+
+	return found
 }
 
-func matchValues(queryValue interface{}, documentValue interface{}) {
-	// TODO
+func matchValues(queryValue interface{}, documentValue interface{}) bool {
+
+	if IsString(queryValue) || IsNumber(queryValue) || IsBoolean(queryValue) || IsNil(queryValue) {
+		return queryValue == documentValue
+	}
+
+	if IsFunction(queryValue) {
+		queryFunc := reflect.ValueOf(queryValue).Interface().(QueryFunc)
+		return queryFunc(documentValue)
+	}
+
+	return false
 }
 
-func parseDatabaseStorage(content string) ([]interface{}, error) {
-	documents := []interface{}{}
+func parseDatabaseStorage(content string) ([]map[string]interface{}, error) {
+	documents := []map[string]interface{}{}
 	err := json.Unmarshal([]byte(content), &documents)
 	return documents, err
 }
