@@ -111,6 +111,24 @@ func (d *Database) FindOne(query map[string]interface{}) map[string]interface{} 
 	return nil
 }
 
+func (d *Database) FindMany(query map[string]interface{}) []map[string]interface{} {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	results := []map[string]interface{}{}
+
+	if len(found) > 0 {
+		for index := range found {
+			results = append(results, d.documents[index])
+		}
+		return results
+	}
+
+	return nil
+}
+
 func (d *Database) load() {
 
 	content := "[]"
