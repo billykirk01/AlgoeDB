@@ -1,7 +1,5 @@
-<h3 align="center">AlgoeDB</h3>
-<p align="center"><i>A light, Embeddable, NoSQL database written in Go. Inspired by (and wherever possible a port of) the Deno project <a href="https://github.com/Kirlovon/AloeDB">AloeDB</a></i>.</p>
-
-<br>
+## AlgoeDB
+A light, Embeddable, NoSQL database written in Go. Inspired by (and wherever possible a port of) the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB)
 
 ## ✨ Features
 * 🎉 Simple to use API, similar to [MongoDB](https://www.mongodb.com/)!
