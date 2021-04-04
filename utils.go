@@ -39,3 +39,14 @@ func MoreThan(value float64) QueryFunc {
 		return false
 	}
 }
+
+func LessThan(value float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target < value
+		}
+
+		return false
+	}
+}
