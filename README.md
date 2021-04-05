@@ -12,7 +12,7 @@ Inspired by (and wherever possible a port of) the Deno project [AloeDB](https://
 ## Examples Usage
 
 ```go
-config := AlgoeDB.DatabaseConfig{Path: "/path/to/file.json"}
+config := AlgoeDB.DatabaseConfig{Path: "/path/to/file/people.json"}
 db, err := AlgoeDB.NewDatabase(&config)
 if err != nil {
     log.Fatal(err)
