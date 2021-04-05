@@ -20,7 +20,7 @@ if err != nil {
 
 people := []map[string]interface{}{}
 people = append(people, map[string]interface{}{"name": "Billy", "age": 27})
-people = append(people,  map[string]interface{}{"name": "Carisa", "age": 26})
+people = append(people, map[string]interface{}{"name": "Carisa", "age": 26})
 
 err = db.InsertMany(people)
 if err != nil {
@@ -36,11 +36,11 @@ if results != nil {
     fmt.Println("no documents found")
 }
 
-query = map[string]interface{}{"age": AlgoeDB.MoreThan(26)}
+query = map[string]interface{}{"age": AlgoeDB.MoreThan(25)}
 results = db.FindMany(query)
 
 if results != nil {
-    fmt.Println("results:", results) //results: [map[age:27 name:Billy]]
+    fmt.Println("results:", results) //results: [map[age:27 name:Billy] map[age:26 name:Carisa]]
 } else {
     fmt.Println("no documents found")
 }
