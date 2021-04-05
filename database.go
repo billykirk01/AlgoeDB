@@ -147,7 +147,6 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 }
 
 func (d *Database) load() error {
-
 	content := "[]"
 
 	if d.config.Path != "" {
@@ -177,7 +176,6 @@ func (d *Database) load() error {
 }
 
 func (d *Database) save() error {
-
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
 		return errors.New("failed to marshal JSON")
