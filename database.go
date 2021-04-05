@@ -3,6 +3,7 @@ package AlgoeDB
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -17,11 +18,8 @@ type Database struct {
 
 type DatabaseConfig struct {
 	Path            string
-	Pretty          *bool
-	Autoload        *bool
-	Immutable       *bool
 	OnlyInMemory    *bool
-	SchemaValidator *SchemaValidator
+	SchemaValidator SchemaValidator
 }
 
 type SchemaValidator func(document interface{}) bool
@@ -29,23 +27,7 @@ type SchemaValidator func(document interface{}) bool
 type QueryFunc func(value interface{}) bool
 
 func NewDatabase(config *DatabaseConfig) (*Database, error) {
-
-	pretty := true
-	autoload := true
-	immutable := true
 	onlyInMemory := false
-
-	if config.Pretty == nil {
-		config.Pretty = &pretty
-	}
-
-	if config.Autoload == nil {
-		config.Autoload = &autoload
-	}
-
-	if config.Immutable == nil {
-		config.Immutable = &immutable
-	}
 
 	if config.OnlyInMemory == nil {
 		config.OnlyInMemory = &onlyInMemory
@@ -62,7 +44,7 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 		config:    *config,
 	}
 
-	if config.Path != "" && *config.Autoload {
+	if config.Path != "" {
 		database.load()
 	}
 
@@ -72,6 +54,10 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 func (d *Database) InsertOne(document map[string]interface{}) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+
+	if !d.config.SchemaValidator(document) {
+		return errors.New("document failed scheman validtion: " + fmt.Sprint(document))
+	}
 
 	d.documents = append(d.documents, document)
 
@@ -88,6 +74,12 @@ func (d *Database) InsertOne(document map[string]interface{}) error {
 func (d *Database) InsertMany(documents []map[string]interface{}) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
+
+	for _, document := range documents {
+		if !d.config.SchemaValidator(document) {
+			return errors.New("document failed schema validtion: " + fmt.Sprint(document))
+		}
+	}
 
 	d.documents = append(d.documents, documents...)
 
@@ -185,6 +177,7 @@ func (d *Database) load() error {
 }
 
 func (d *Database) save() error {
+
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
 		return errors.New("failed to marshal JSON")
@@ -211,7 +204,6 @@ func (d *Database) save() error {
 }
 
 func searchDocuments(query map[string]interface{}, documents []map[string]interface{}) []int {
-
 	found := []int{}
 
 	for index, document := range documents {
@@ -239,7 +231,6 @@ func searchDocuments(query map[string]interface{}, documents []map[string]interf
 }
 
 func matchValues(queryValue interface{}, documentValue interface{}) bool {
-
 	if IsString(queryValue) || IsNumber(queryValue) || IsBoolean(queryValue) || IsNil(queryValue) {
 		return queryValue == documentValue
 	}
