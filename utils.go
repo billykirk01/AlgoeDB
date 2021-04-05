@@ -105,23 +105,23 @@ func LessThanOrEqual(value float64) QueryFunc {
 
 func Between(lowValue float64, highValue float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target < highValue && target > lowValue
+		number, err := getNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number < highValue && number > lowValue
 	}
 }
 
 func BetweenOrEqual(lowValue float64, highValue float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target <= highValue && target >= lowValue
+		number, err := getNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number <= highValue && number >= lowValue
 	}
 }
 
