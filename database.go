@@ -12,7 +12,7 @@ import (
 
 type Database struct {
 	config    DatabaseConfig
-	mu        sync.Mutex
+	mutex     sync.Mutex
 	documents []map[string]interface{}
 }
 
@@ -52,8 +52,8 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 }
 
 func (d *Database) InsertOne(document map[string]interface{}) error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	if !d.config.SchemaValidator(document) {
 		return errors.New("document failed scheman validtion: " + fmt.Sprint(document))
@@ -72,8 +72,8 @@ func (d *Database) InsertOne(document map[string]interface{}) error {
 }
 
 func (d *Database) InsertMany(documents []map[string]interface{}) error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	for _, document := range documents {
 		if !d.config.SchemaValidator(document) {
@@ -94,8 +94,8 @@ func (d *Database) InsertMany(documents []map[string]interface{}) error {
 }
 
 func (d *Database) FindOne(query map[string]interface{}) (map[string]interface{}, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
@@ -107,8 +107,8 @@ func (d *Database) FindOne(query map[string]interface{}) (map[string]interface{}
 }
 
 func (d *Database) FindMany(query map[string]interface{}) ([]map[string]interface{}, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
@@ -126,8 +126,8 @@ func (d *Database) FindMany(query map[string]interface{}) ([]map[string]interfac
 }
 
 func (d *Database) UpdateOne(query map[string]interface{}, document map[string]interface{}) (map[string]interface{}, error) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
