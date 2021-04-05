@@ -14,7 +14,6 @@ type Database struct {
 	config    DatabaseConfig
 	mu        sync.Mutex
 	documents []map[string]interface{}
-	writer    Writer
 }
 
 type DatabaseConfig struct {
@@ -54,16 +53,13 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 	}
 
 	if config.Path == "" && *config.OnlyInMemory {
-		return nil, errors.New("It is impossible to disable onlyInMemory mode if the path is not specified")
+		return nil, errors.New("it is impossible to disable onlyInMemory mode if the path is not specified")
 	}
 
 	documents := []map[string]interface{}{}
 
-	writer := Writer{Path: config.Path}
-
 	database := Database{
 		documents: documents,
-		writer:    writer,
 		config:    *config,
 	}
 
@@ -89,9 +85,7 @@ func (d *Database) InsertMany(documents []map[string]interface{}) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	for _, document := range documents {
-		d.documents = append(d.documents, document)
-	}
+	d.documents = append(d.documents, documents...)
 
 	if !*d.config.OnlyInMemory {
 		d.save()
@@ -140,6 +134,10 @@ func (d *Database) load() {
 		}
 
 		bytes, err := ioutil.ReadFile(d.config.Path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		content = string(bytes)
 		f.Close()
 	}
@@ -158,18 +156,23 @@ func (d *Database) save() {
 		log.Fatal(err)
 	}
 
-	d.writer.Write(string(bytes))
-}
-
-func (d *Database) drop() {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	d.documents = []map[string]interface{}{}
-
-	if *d.config.OnlyInMemory {
-		d.save()
+	temp := d.config.Path + ".temp"
+	f, err := os.Create(temp)
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer f.Close()
+
+	err = ioutil.WriteFile(temp, bytes, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Rename(temp, d.config.Path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func searchDocuments(query map[string]interface{}, documents []map[string]interface{}) []int {
