@@ -14,7 +14,7 @@ func IsNumber(value interface{}) bool {
 	}
 }
 
-func GetNumber(value interface{}) (float64, error) {
+func getNumber(value interface{}) (float64, error) {
 	switch x := value.(type) {
 	case uint8:
 		return float64(x), nil
@@ -61,7 +61,7 @@ func IsFunction(value interface{}) bool {
 
 func MoreThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		number, err := GetNumber(target)
+		number, err := getNumber(target)
 		if err != nil {
 			return false
 		}
@@ -72,7 +72,7 @@ func MoreThan(value float64) QueryFunc {
 
 func MoreThanOrEqual(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		number, err := GetNumber(target)
+		number, err := getNumber(target)
 		if err != nil {
 			return false
 		}
@@ -83,7 +83,7 @@ func MoreThanOrEqual(value float64) QueryFunc {
 
 func LessThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		number, err := GetNumber(target)
+		number, err := getNumber(target)
 		if err != nil {
 			return false
 		}
@@ -94,7 +94,7 @@ func LessThan(value float64) QueryFunc {
 
 func LessThanOrEqual(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		number, err := GetNumber(target)
+		number, err := getNumber(target)
 		if err != nil {
 			return false
 		}
