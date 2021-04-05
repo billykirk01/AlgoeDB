@@ -28,7 +28,7 @@ if err != nil {
 }
 
 query := map[string]interface{}{"name": "Carisa"}
-results := db.FindMany(query)
+results := db.FindOne(query)
 
 if results != nil {
     fmt.Println("results:", results) //results: [map[age:26 name:Carisa]]
