@@ -19,7 +19,8 @@ if err != nil {
 }
 
 people := []map[string]interface{}{}
-people = append(people, map[string]interface{}{"name": "Billy", "age": 27}, map[string]interface{}{"name": "Carisa", "age": 26})
+people = append(people, map[string]interface{}{"name": "Billy", "age": 27})
+people = append(people,  map[string]interface{}{"name": "Carisa", "age": 26})
 
 err = db.InsertMany(people)
 if err != nil {
