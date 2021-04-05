@@ -56,7 +56,7 @@ func (d *Database) InsertOne(document map[string]interface{}) error {
 	defer d.mutex.Unlock()
 
 	if !d.config.SchemaValidator(document) {
-		return errors.New("document failed scheman validtion: " + fmt.Sprint(document))
+		return errors.New("document failed schema validtion: " + fmt.Sprint(document))
 	}
 
 	d.documents = append(d.documents, document)
