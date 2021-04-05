@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"reflect"
 	"sync"
@@ -45,7 +46,10 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 	}
 
 	if config.Path != "" {
-		database.load()
+		err := database.load()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return &database, nil
@@ -76,7 +80,7 @@ func (d *Database) InsertMany(documents []map[string]interface{}) error {
 	defer d.mutex.Unlock()
 
 	for _, document := range documents {
-		if !d.config.SchemaValidator(document) {
+		if d.config.SchemaValidator != nil && !d.config.SchemaValidator(document) {
 			return errors.New("document failed schema validtion: " + fmt.Sprint(document))
 		}
 	}
@@ -93,36 +97,36 @@ func (d *Database) InsertMany(documents []map[string]interface{}) error {
 	return nil
 }
 
-func (d *Database) FindOne(query map[string]interface{}) (map[string]interface{}, error) {
+func (d *Database) FindOne(query map[string]interface{}) map[string]interface{} {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
 	if len(found) == 0 {
-		return nil, errors.New("could not find any matching documents")
+		return nil
 	}
 
-	return d.documents[found[0]], nil
+	return d.documents[found[0]]
 }
 
-func (d *Database) FindMany(query map[string]interface{}) ([]map[string]interface{}, error) {
+func (d *Database) FindMany(query map[string]interface{}) []map[string]interface{} {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
 	if len(found) == 0 {
-		return nil, errors.New("could not find any matching documents")
+		return nil
 	}
 
 	results := []map[string]interface{}{}
 
-	for index := range found {
+	for _, index := range found {
 		results = append(results, d.documents[index])
 	}
 
-	return results, nil
+	return results
 }
 
 func (d *Database) UpdateOne(query map[string]interface{}, document map[string]interface{}) (map[string]interface{}, error) {
@@ -150,9 +154,11 @@ func (d *Database) load() error {
 	content := "[]"
 
 	if d.config.Path != "" {
-		f, err := os.Open(d.config.Path)
-		if err != nil {
-			return errors.New("failed to open file: " + d.config.Path)
+		if _, err := os.Stat(d.config.Path); os.IsNotExist(err) {
+			_, err := os.Create(d.config.Path)
+			if err != nil {
+				return errors.New("failed to create file: " + d.config.Path)
+			}
 		}
 
 		bytes, err := ioutil.ReadFile(d.config.Path)
@@ -160,8 +166,9 @@ func (d *Database) load() error {
 			return errors.New("failed to read file: " + d.config.Path)
 		}
 
-		content = string(bytes)
-		f.Close()
+		if len(bytes) != 0 {
+			content = string(bytes)
+		}
 	}
 
 	documents := []map[string]interface{}{}
@@ -172,10 +179,13 @@ func (d *Database) load() error {
 
 	d.documents = documents
 
+	d.save()
+
 	return nil
 }
 
 func (d *Database) save() error {
+
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
 		return errors.New("failed to marshal JSON")
@@ -215,9 +225,7 @@ func searchDocuments(query map[string]interface{}, documents []map[string]interf
 
 			documentValue := document[key]
 
-			if !matchValues(queryValue, documentValue) {
-				include = false
-			}
+			include = matchValues(queryValue, documentValue)
 		}
 
 		if include {
@@ -229,6 +237,7 @@ func searchDocuments(query map[string]interface{}, documents []map[string]interf
 }
 
 func matchValues(queryValue interface{}, documentValue interface{}) bool {
+
 	if IsString(queryValue) || IsNumber(queryValue) || IsBoolean(queryValue) || IsNil(queryValue) {
 		return queryValue == documentValue
 	}

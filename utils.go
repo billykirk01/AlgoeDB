@@ -1,6 +1,7 @@
 package AlgoeDB
 
 import (
+	"errors"
 	"reflect"
 )
 
@@ -10,6 +11,35 @@ func IsNumber(value interface{}) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func GetNumber(value interface{}) (float64, error) {
+	switch x := value.(type) {
+	case uint8:
+		return float64(x), nil
+	case int8:
+		return float64(x), nil
+	case uint16:
+		return float64(x), nil
+	case int16:
+		return float64(x), nil
+	case uint32:
+		return float64(x), nil
+	case int32:
+		return float64(x), nil
+	case uint64:
+		return float64(x), nil
+	case int64:
+		return float64(x), nil
+	case int:
+		return float64(x), nil
+	case float32:
+		return float64(x), nil
+	case float64:
+		return float64(x), nil
+	default:
+		return 0, errors.New("Could not convert number")
 	}
 }
 
@@ -31,45 +61,45 @@ func IsFunction(value interface{}) bool {
 
 func MoreThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target > value
+		number, err := GetNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number > value
 	}
 }
 
 func MoreThanOrEqual(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target >= value
+		number, err := GetNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number >= value
 	}
 }
 
 func LessThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target < value
+		number, err := GetNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number < value
 	}
 }
 
 func LessThanOrEqual(value float64) QueryFunc {
 	return func(target interface{}) bool {
-		if IsNumber(target) {
-			target := reflect.ValueOf(target).Interface().(float64)
-			return target < value
+		number, err := GetNumber(target)
+		if err != nil {
+			return false
 		}
 
-		return false
+		return number <= value
 	}
 }
 
