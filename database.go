@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"reflect"
 	"sync"
@@ -70,109 +69,145 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 	return &database, nil
 }
 
-func (d *Database) InsertOne(document map[string]interface{}) {
+func (d *Database) InsertOne(document map[string]interface{}) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	d.documents = append(d.documents, document)
 
 	if !*d.config.OnlyInMemory {
-		d.save()
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func (d *Database) InsertMany(documents []map[string]interface{}) {
+func (d *Database) InsertMany(documents []map[string]interface{}) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	d.documents = append(d.documents, documents...)
 
 	if !*d.config.OnlyInMemory {
-		d.save()
-	}
-}
-
-func (d *Database) FindOne(query map[string]interface{}) map[string]interface{} {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-
-	found := searchDocuments(query, d.documents)
-
-	if len(found) > 0 {
-		return d.documents[found[0]]
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (d *Database) FindMany(query map[string]interface{}) []map[string]interface{} {
+func (d *Database) FindOne(query map[string]interface{}) (map[string]interface{}, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return nil, errors.New("could not find any matching documents")
+	}
+
+	return d.documents[found[0]], nil
+}
+
+func (d *Database) FindMany(query map[string]interface{}) ([]map[string]interface{}, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return nil, errors.New("could not find any matching documents")
+	}
 
 	results := []map[string]interface{}{}
 
-	if len(found) > 0 {
-		for index := range found {
-			results = append(results, d.documents[index])
-		}
-		return results
+	for index := range found {
+		results = append(results, d.documents[index])
 	}
 
-	return nil
+	return results, nil
 }
 
-func (d *Database) load() {
+func (d *Database) UpdateOne(query map[string]interface{}, document map[string]interface{}) (map[string]interface{}, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return nil, errors.New("could not find document to update")
+	}
+
+	temp := d.documents[found[0]]
+
+	for key, value := range document {
+		temp[key] = value
+	}
+
+	d.documents[found[0]] = temp
+
+	return temp, nil
+}
+
+func (d *Database) load() error {
 
 	content := "[]"
 
 	if d.config.Path != "" {
 		f, err := os.Open(d.config.Path)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("failed to open file: " + d.config.Path)
 		}
 
 		bytes, err := ioutil.ReadFile(d.config.Path)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("failed to read file: " + d.config.Path)
 		}
 
 		content = string(bytes)
 		f.Close()
 	}
 
-	documents, err := parseDatabaseStorage(content)
+	documents := []map[string]interface{}{}
+	err := json.Unmarshal([]byte(content), &documents)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	d.documents = documents
+
+	return nil
 }
 
-func (d *Database) save() {
+func (d *Database) save() error {
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
-		log.Fatal(err)
+		return errors.New("failed to marshal JSON")
 	}
 
 	temp := d.config.Path + ".temp"
 	f, err := os.Create(temp)
 	if err != nil {
-		log.Fatal(err)
+		return errors.New("failed to create temporary file: " + temp)
 	}
 	defer f.Close()
 
 	err = ioutil.WriteFile(temp, bytes, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return errors.New("failed to write data to temporary file: " + temp)
 	}
 
 	err = os.Rename(temp, d.config.Path)
 	if err != nil {
-		log.Fatal(err)
+		return errors.New("failed to rename temporary file: " + temp + " to: " + d.config.Path)
 	}
 
+	return nil
 }
 
 func searchDocuments(query map[string]interface{}, documents []map[string]interface{}) []int {
@@ -215,10 +250,4 @@ func matchValues(queryValue interface{}, documentValue interface{}) bool {
 	}
 
 	return false
-}
-
-func parseDatabaseStorage(content string) ([]map[string]interface{}, error) {
-	documents := []map[string]interface{}{}
-	err := json.Unmarshal([]byte(content), &documents)
-	return documents, err
 }
