@@ -40,6 +40,17 @@ func MoreThan(value float64) QueryFunc {
 	}
 }
 
+func MoreThanOrEqual(value float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target >= value
+		}
+
+		return false
+	}
+}
+
 func LessThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
 		if IsNumber(target) {
@@ -48,5 +59,72 @@ func LessThan(value float64) QueryFunc {
 		}
 
 		return false
+	}
+}
+
+func LessThanOrEqual(value float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target < value
+		}
+
+		return false
+	}
+}
+
+func Between(lowValue float64, highValue float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target < highValue && target > lowValue
+		}
+
+		return false
+	}
+}
+
+func BetweenOrEqual(lowValue float64, highValue float64) QueryFunc {
+	return func(target interface{}) bool {
+		if IsNumber(target) {
+			target := reflect.ValueOf(target).Interface().(float64)
+			return target <= highValue && target >= lowValue
+		}
+
+		return false
+	}
+}
+
+func Exists() QueryFunc {
+	return func(target interface{}) bool {
+		return target != nil
+	}
+}
+
+func And(queryValues ...QueryFunc) QueryFunc {
+	return func(target interface{}) bool {
+		for _, queryValue := range queryValues {
+			if !matchValues(queryValue, target) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+func Or(queryValues ...QueryFunc) QueryFunc {
+	return func(target interface{}) bool {
+		for _, queryValue := range queryValues {
+			if matchValues(queryValue, target) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func Not(queryValue QueryFunc) QueryFunc {
+	return func(target interface{}) bool {
+		return !matchValues(queryValue, target)
 	}
 }
