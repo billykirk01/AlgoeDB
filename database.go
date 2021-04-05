@@ -129,14 +129,14 @@ func (d *Database) FindMany(query map[string]interface{}) []map[string]interface
 	return results
 }
 
-func (d *Database) UpdateOne(query map[string]interface{}, document map[string]interface{}) (map[string]interface{}, error) {
+func (d *Database) UpdateOne(query map[string]interface{}, document map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
 
 	if len(found) == 0 {
-		return nil, errors.New("could not find document to update")
+		return errors.New("could not find document to update")
 	}
 
 	temp := d.documents[found[0]]
@@ -147,7 +147,79 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 
 	d.documents[found[0]] = temp
 
-	return temp, nil
+	err := d.save()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Database) UpdateMany(query map[string]interface{}, document map[string]interface{}) error {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return errors.New("could not find document(s) to update")
+	}
+
+	for _, index := range found {
+		temp := d.documents[index]
+		for key, value := range document {
+			temp[key] = value
+		}
+
+		d.documents[index] = temp
+	}
+
+	err := d.save()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Database) DeleteOne(query map[string]interface{}, document map[string]interface{}) error {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return errors.New("could not find document to update")
+	}
+
+	d.documents = append(d.documents[:found[0]], d.documents[found[0]+1:]...)
+
+	err := d.save()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Database) DeleteMany(query map[string]interface{}, document map[string]interface{}) error {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	found := searchDocuments(query, d.documents)
+
+	if len(found) == 0 {
+		return errors.New("could not find document(s) to update")
+	}
+
+	//TODO
+
+	err := d.save()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (d *Database) load() error {
