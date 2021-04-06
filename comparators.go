@@ -92,6 +92,22 @@ func Matches(pattern string) QueryFunc {
 	}
 }
 
+func SliceContainsString(item string) QueryFunc {
+	return func(target interface{}) bool {
+		switch x := target.(type) {
+		case []string:
+			for _, value := range x {
+				if item == value {
+					return true
+				}
+			}
+			return false
+		default:
+			return false
+		}
+	}
+}
+
 func And(queryValues ...QueryFunc) QueryFunc {
 	return func(target interface{}) bool {
 		for _, queryValue := range queryValues {
