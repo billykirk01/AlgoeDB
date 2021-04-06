@@ -39,7 +39,7 @@ func getNumber(value interface{}) (float64, error) {
 	case float64:
 		return float64(x), nil
 	default:
-		return 0, errors.New("Could not convert number")
+		return 0, errors.New("could not convert number")
 	}
 }
 
