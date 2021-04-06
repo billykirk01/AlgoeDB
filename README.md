@@ -1,4 +1,4 @@
-## AlgoeDB
+## AlgoeDB 🌿
 A lightweight, persistent, NoSQL database written in Go. 
 
 Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many thanks to [@Kirlovon](https://github.com/Kirlovon) for the inspiration!
