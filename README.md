@@ -34,7 +34,7 @@ if err != nil {
 query := Person{"name": "Carisa"}
 result := db.FindOne(query)
 if result != nil {
-    fmt.Println(result) // [map[age:26 name:Carisa]]
+    fmt.Println(result) //[map[age:26 name:Carisa]]
 } else {
     fmt.Println("no documents found")
 }
