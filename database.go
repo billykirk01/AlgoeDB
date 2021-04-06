@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"reflect"
 	"sync"
 )
 
@@ -101,7 +100,7 @@ func (d *Database) FindOne(query map[string]interface{}) map[string]interface{} 
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 
 	if len(found) == 0 {
 		return nil
@@ -114,7 +113,7 @@ func (d *Database) FindMany(query map[string]interface{}) []map[string]interface
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 
 	if len(found) == 0 {
 		return nil
@@ -133,7 +132,7 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 
 	if len(found) == 0 {
 		return errors.New("could not find document to update")
@@ -161,7 +160,7 @@ func (d *Database) UpdateMany(query map[string]interface{}, document map[string]
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 
 	if len(found) == 0 {
 		return errors.New("could not find document(s) to update")
@@ -190,7 +189,7 @@ func (d *Database) DeleteOne(query map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 
 	if len(found) == 0 {
 		return errors.New("could not find document to update")
@@ -212,7 +211,7 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	found := searchDocuments(query, d.documents)
+	found := d.searchDocuments(query)
 	if len(found) == 0 {
 		return errors.New("could not find document(s) to update")
 	}
@@ -304,10 +303,10 @@ func (d *Database) save() error {
 	return nil
 }
 
-func searchDocuments(query map[string]interface{}, documents []map[string]interface{}) []int {
+func (d *Database) searchDocuments(query map[string]interface{}) []int {
 	found := []int{}
 
-	for index, document := range documents {
+	for index, document := range d.documents {
 
 		include := true
 
@@ -334,9 +333,9 @@ func matchValues(queryValue interface{}, documentValue interface{}) bool {
 		return true
 	}
 
-	if reflect.TypeOf(queryValue).Kind() == reflect.Func {
-		queryFunc := reflect.ValueOf(queryValue).Interface().(QueryFunc)
-		return queryFunc(documentValue)
+	switch x := queryValue.(type) {
+	case QueryFunc:
+		return x(documentValue)
 	}
 
 	return false
