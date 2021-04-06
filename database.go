@@ -283,21 +283,9 @@ func (d *Database) save() error {
 		return errors.New("failed to marshal JSON")
 	}
 
-	temp := d.config.Path + ".temp"
-	f, err := os.Create(temp)
+	err = ioutil.WriteFile(d.config.Path, bytes, 0644)
 	if err != nil {
-		return errors.New("failed to create temporary file: " + temp)
-	}
-	defer f.Close()
-
-	err = ioutil.WriteFile(temp, bytes, 0644)
-	if err != nil {
-		return errors.New("failed to write data to temporary file: " + temp)
-	}
-
-	err = os.Rename(temp, d.config.Path)
-	if err != nil {
-		return errors.New("failed to rename temporary file: " + temp + " to: " + d.config.Path)
+		return errors.New("failed to write data to file")
 	}
 
 	return nil
