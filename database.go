@@ -207,12 +207,23 @@ func (d *Database) DeleteMany(query map[string]interface{}, document map[string]
 	defer d.mutex.Unlock()
 
 	found := searchDocuments(query, d.documents)
-
 	if len(found) == 0 {
 		return errors.New("could not find document(s) to update")
 	}
 
-	//TODO
+	foundMap := map[int]bool{}
+	for _, value := range found {
+		foundMap[value] = true
+	}
+
+	temp := []map[string]interface{}{}
+	for index, value := range d.documents {
+		if foundMap[index] {
+			temp = append(temp, value)
+		}
+	}
+
+	d.documents = temp
 
 	err := d.save()
 	if err != nil {
