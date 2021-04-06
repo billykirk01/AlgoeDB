@@ -269,13 +269,6 @@ func (d *Database) load() error {
 
 	d.documents = documents
 
-	if !*d.config.OnlyInMemory {
-		err := d.save()
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
