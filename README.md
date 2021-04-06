@@ -3,13 +3,13 @@ A lightweight, persistent, NoSQL database written in Go.
 
 Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many thanks to [@Kirlovon](https://github.com/Kirlovon) for the inspiration!
 
-## Features
+## Features ✨
 * 🎉 Simple to use API, similar to [MongoDB](https://www.mongodb.com/)!
 * 📁 Stores data in readable JSON file.
 * 🚀 Optimized for a large number of operations.
 * ⚖  No dependencies outside of the standard library.
 
-## 📦 Importing
+## Importing 📦 
 ```go
 import "github.com/wkirk01/AlgoeDB"
 ```
