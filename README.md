@@ -5,8 +5,8 @@ Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many 
 
 ## Features
 * 🎉 Simple to use API, similar to [MongoDB](https://www.mongodb.com/)!
-* 🚀 Optimized for a large number of operations.
 * 📁 Stores data in readable JSON file.
+* 🚀 Optimized for a large number of operations.
 * ⚖  No dependencies outside of the standard library.
 
 ## Examples Usage
