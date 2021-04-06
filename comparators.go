@@ -1,6 +1,9 @@
 package AlgoeDB
 
-import "errors"
+import (
+	"errors"
+	"regexp"
+)
 
 func MoreThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
@@ -99,6 +102,21 @@ func Or(queryValues ...QueryFunc) QueryFunc {
 func Not(queryValue QueryFunc) QueryFunc {
 	return func(target interface{}) bool {
 		return !matchValues(queryValue, target)
+	}
+}
+
+func MatchesExpression(pattern string) QueryFunc {
+	return func(target interface{}) bool {
+		switch x := target.(type) {
+		case string:
+			ok, _ := regexp.MatchString(pattern, x)
+			if ok {
+				return true
+			}
+			return false
+		default:
+			return false
+		}
 	}
 }
 
