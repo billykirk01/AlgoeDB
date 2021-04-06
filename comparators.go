@@ -77,6 +77,21 @@ func Exists() QueryFunc {
 	}
 }
 
+func MatchesExpression(pattern string) QueryFunc {
+	return func(target interface{}) bool {
+		switch x := target.(type) {
+		case string:
+			ok, _ := regexp.MatchString(pattern, x)
+			if ok {
+				return true
+			}
+			return false
+		default:
+			return false
+		}
+	}
+}
+
 func And(queryValues ...QueryFunc) QueryFunc {
 	return func(target interface{}) bool {
 		for _, queryValue := range queryValues {
@@ -102,21 +117,6 @@ func Or(queryValues ...QueryFunc) QueryFunc {
 func Not(queryValue QueryFunc) QueryFunc {
 	return func(target interface{}) bool {
 		return !matchValues(queryValue, target)
-	}
-}
-
-func MatchesExpression(pattern string) QueryFunc {
-	return func(target interface{}) bool {
-		switch x := target.(type) {
-		case string:
-			ok, _ := regexp.MatchString(pattern, x)
-			if ok {
-				return true
-			}
-			return false
-		default:
-			return false
-		}
 	}
 }
 
