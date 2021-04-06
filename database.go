@@ -18,7 +18,6 @@ type Database struct {
 
 type DatabaseConfig struct {
 	Path            string
-	OnlyInMemory    *bool
 	SchemaValidator SchemaValidator
 }
 
@@ -27,15 +26,6 @@ type SchemaValidator func(document interface{}) bool
 type QueryFunc func(value interface{}) bool
 
 func NewDatabase(config *DatabaseConfig) (*Database, error) {
-	onlyInMemory := false
-
-	if config.OnlyInMemory == nil {
-		config.OnlyInMemory = &onlyInMemory
-	}
-
-	if config.Path == "" && *config.OnlyInMemory {
-		return nil, errors.New("it is impossible to disable onlyInMemory mode if the path is not specified")
-	}
 
 	documents := []map[string]interface{}{}
 
@@ -44,11 +34,9 @@ func NewDatabase(config *DatabaseConfig) (*Database, error) {
 		config:    *config,
 	}
 
-	if config.Path != "" {
-		err := database.load()
-		if err != nil {
-			log.Fatal(err)
-		}
+	err := database.load()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return &database, nil
@@ -64,7 +52,7 @@ func (d *Database) InsertOne(document map[string]interface{}) error {
 
 	d.documents = append(d.documents, document)
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -86,7 +74,7 @@ func (d *Database) InsertMany(documents []map[string]interface{}) error {
 
 	d.documents = append(d.documents, documents...)
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -146,7 +134,7 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 
 	d.documents[found[0]] = temp
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -175,7 +163,7 @@ func (d *Database) UpdateMany(query map[string]interface{}, document map[string]
 		d.documents[index] = temp
 	}
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -197,7 +185,7 @@ func (d *Database) DeleteOne(query map[string]interface{}) error {
 
 	d.documents = append(d.documents[:found[0]], d.documents[found[0]+1:]...)
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -230,7 +218,7 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 
 	d.documents = temp
 
-	if !*d.config.OnlyInMemory {
+	if d.config.Path != "" {
 		err := d.save()
 		if err != nil {
 			return err
@@ -243,7 +231,7 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 func (d *Database) load() error {
 	content := "[]"
 
-	if !*d.config.OnlyInMemory && d.config.Path != "" {
+	if d.config.Path != "" {
 		if _, err := os.Stat(d.config.Path); os.IsNotExist(err) {
 			_, err := os.Create(d.config.Path)
 			if err != nil {
