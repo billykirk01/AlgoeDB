@@ -1,37 +1,6 @@
 package AlgoeDB
 
-import (
-	"errors"
-)
-
-func getNumber(value interface{}) (float64, error) {
-	switch x := value.(type) {
-	case uint8:
-		return float64(x), nil
-	case int8:
-		return float64(x), nil
-	case uint16:
-		return float64(x), nil
-	case int16:
-		return float64(x), nil
-	case uint32:
-		return float64(x), nil
-	case int32:
-		return float64(x), nil
-	case uint64:
-		return float64(x), nil
-	case int64:
-		return float64(x), nil
-	case int:
-		return float64(x), nil
-	case float32:
-		return float64(x), nil
-	case float64:
-		return float64(x), nil
-	default:
-		return 0, errors.New("could not convert number")
-	}
-}
+import "errors"
 
 func MoreThan(value float64) QueryFunc {
 	return func(target interface{}) bool {
@@ -130,5 +99,34 @@ func Or(queryValues ...QueryFunc) QueryFunc {
 func Not(queryValue QueryFunc) QueryFunc {
 	return func(target interface{}) bool {
 		return !matchValues(queryValue, target)
+	}
+}
+
+func getNumber(value interface{}) (float64, error) {
+	switch x := value.(type) {
+	case uint8:
+		return float64(x), nil
+	case int8:
+		return float64(x), nil
+	case uint16:
+		return float64(x), nil
+	case int16:
+		return float64(x), nil
+	case uint32:
+		return float64(x), nil
+	case int32:
+		return float64(x), nil
+	case uint64:
+		return float64(x), nil
+	case int64:
+		return float64(x), nil
+	case int:
+		return float64(x), nil
+	case float32:
+		return float64(x), nil
+	case float64:
+		return float64(x), nil
+	default:
+		return 0, errors.New("could not convert number")
 	}
 }
