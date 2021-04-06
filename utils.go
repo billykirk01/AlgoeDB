@@ -44,11 +44,21 @@ func getNumber(value interface{}) (float64, error) {
 }
 
 func IsString(value interface{}) bool {
-	return reflect.TypeOf(value).Kind() == reflect.String
+	switch value.(type) {
+	case string:
+		return true
+	default:
+		return false
+	}
 }
 
 func IsBoolean(value interface{}) bool {
-	return reflect.TypeOf(value).Kind() == reflect.Bool
+	switch value.(type) {
+	case bool:
+		return true
+	default:
+		return false
+	}
 }
 
 func IsNil(value interface{}) bool {
