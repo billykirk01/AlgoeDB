@@ -268,7 +268,6 @@ func (d *Database) load() error {
 }
 
 func (d *Database) save() error {
-
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
 		return errors.New("failed to marshal JSON")
