@@ -147,9 +147,11 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 
 	d.documents[found[0]] = temp
 
-	err := d.save()
-	if err != nil {
-		return err
+	if !*d.config.OnlyInMemory {
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -174,9 +176,11 @@ func (d *Database) UpdateMany(query map[string]interface{}, document map[string]
 		d.documents[index] = temp
 	}
 
-	err := d.save()
-	if err != nil {
-		return err
+	if !*d.config.OnlyInMemory {
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -194,9 +198,11 @@ func (d *Database) DeleteOne(query map[string]interface{}) error {
 
 	d.documents = append(d.documents[:found[0]], d.documents[found[0]+1:]...)
 
-	err := d.save()
-	if err != nil {
-		return err
+	if !*d.config.OnlyInMemory {
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -225,9 +231,11 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 
 	d.documents = temp
 
-	err := d.save()
-	if err != nil {
-		return err
+	if !*d.config.OnlyInMemory {
+		err := d.save()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
