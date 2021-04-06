@@ -46,17 +46,15 @@ func (d *Database) InsertOne(document map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	if !d.config.SchemaValidator(document) {
+	if d.config.SchemaValidator != nil && !d.config.SchemaValidator(document) {
 		return errors.New("document failed schema validtion: " + fmt.Sprint(document))
 	}
 
 	d.documents = append(d.documents, document)
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -74,11 +72,9 @@ func (d *Database) InsertMany(documents []map[string]interface{}) error {
 
 	d.documents = append(d.documents, documents...)
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -134,11 +130,9 @@ func (d *Database) UpdateOne(query map[string]interface{}, document map[string]i
 
 	d.documents[found[0]] = temp
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -163,11 +157,9 @@ func (d *Database) UpdateMany(query map[string]interface{}, document map[string]
 		d.documents[index] = temp
 	}
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -185,11 +177,9 @@ func (d *Database) DeleteOne(query map[string]interface{}) error {
 
 	d.documents = append(d.documents[:found[0]], d.documents[found[0]+1:]...)
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -218,11 +208,9 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 
 	d.documents = temp
 
-	if d.config.Path != "" {
-		err := d.save()
-		if err != nil {
-			return err
-		}
+	err := d.save()
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -261,6 +249,11 @@ func (d *Database) load() error {
 }
 
 func (d *Database) save() error {
+
+	if d.config.Path == "" {
+		return nil
+	}
+
 	bytes, err := json.MarshalIndent(d.documents, "", "\t")
 	if err != nil {
 		return errors.New("failed to marshal JSON")
