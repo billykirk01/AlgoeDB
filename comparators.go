@@ -77,7 +77,7 @@ func Exists() QueryFunc {
 	}
 }
 
-func MatchesExpression(pattern string) QueryFunc {
+func Matches(pattern string) QueryFunc {
 	return func(target interface{}) bool {
 		switch x := target.(type) {
 		case string:
