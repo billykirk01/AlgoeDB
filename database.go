@@ -182,7 +182,7 @@ func (d *Database) UpdateMany(query map[string]interface{}, document map[string]
 	return nil
 }
 
-func (d *Database) DeleteOne(query map[string]interface{}, document map[string]interface{}) error {
+func (d *Database) DeleteOne(query map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
@@ -202,7 +202,7 @@ func (d *Database) DeleteOne(query map[string]interface{}, document map[string]i
 	return nil
 }
 
-func (d *Database) DeleteMany(query map[string]interface{}, document map[string]interface{}) error {
+func (d *Database) DeleteMany(query map[string]interface{}) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
