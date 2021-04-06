@@ -14,7 +14,7 @@ Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many 
 import "github.com/wkirk01/AlgoeDB"
 ```
 
-## Examples Usage
+## Example Usage
 ```go
 type People []map[string]interface{}
 
