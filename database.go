@@ -319,11 +319,12 @@ func searchDocuments(query map[string]interface{}, documents []map[string]interf
 }
 
 func matchValues(queryValue interface{}, documentValue interface{}) bool {
-	if IsString(queryValue) || IsNumber(queryValue) || IsBoolean(queryValue) || IsNil(queryValue) {
-		return queryValue == documentValue
+
+	if queryValue == documentValue {
+		return true
 	}
 
-	if IsFunction(queryValue) {
+	if reflect.TypeOf(queryValue).Kind() == reflect.Func {
 		queryFunc := reflect.ValueOf(queryValue).Interface().(QueryFunc)
 		return queryFunc(documentValue)
 	}
