@@ -9,12 +9,12 @@ Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many 
 * 🚀 Optimized for a large number of operations.
 * ⚖  No dependencies outside of the standard library.
 
-## Examples Usage
-
+## 📦 Importing
 ```go
 import "github.com/wkirk01/AlgoeDB"
 ```
 
+## Examples Usage
 ```go
 type People []map[string]interface{}
 
