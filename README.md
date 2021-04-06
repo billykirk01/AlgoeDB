@@ -12,6 +12,10 @@ Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many 
 ## Examples Usage
 
 ```go
+import "github.com/wkirk01/AlgoeDB"
+```
+
+```go
 type People []map[string]interface{}
 
 type Person map[string]interface{}
