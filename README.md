@@ -18,32 +18,32 @@ type People []map[string]interface{}
 type Person map[string]interface{}
 
 func main() {
-  config := AlgoeDB.DatabaseConfig{Path: "./people.json"}
-  db, err := AlgoeDB.NewDatabase(&config)
-  if err != nil {
-  	log.Fatal(err)
-  }  
-  people := People{}
-  people = append(people, Person{"name": "Billy", "age": 27})
-  people = append(people, Person{"name": "Carisa", "age": 26})  
-  err = db.InsertMany(people)
-  if err != nil {
-  	log.Fatal(err)
-  }  
-  query := Person{"name": "Carisa"}
-  result := db.FindOne(query)  
-  if result != nil {
-  	fmt.Println("results:", result) //result: [map[age:26 name:Carisa]]
-  } else {
-  	fmt.Println("no documents found")
-  }  
-  query = Person{"age": AlgoeDB.MoreThan(25)}
-  results := db.FindMany(query)  
-  if results != nil {
-  	fmt.Println("results:", results) //results: [map[age:27 name:Billy] map[age:26 name:Carisa]]
-  } else {
-  	fmt.Println("no documents found")
-  }
+   config := AlgoeDB.DatabaseConfig{Path: "./people.json"}
+   db, err := AlgoeDB.NewDatabase(&config)
+   if err != nil {
+   	  log.Fatal(err)
+   }   
+   people := People{}
+   people = append(people, Person{"name": "Billy", "age": 27})
+   people = append(people, Person{"name": "Carisa", "age": 26})   
+   err = db.InsertMany(people)
+   if err != nil {
+   	  log.Fatal(err)
+   }   
+   query := Person{"name": "Carisa"}
+   result := db.FindOne(query)   
+   if result != nil {
+   	  fmt.Println("results:", result) //result: [map[age:26 name:Carisa]]
+   } else {
+   	  fmt.Println("no documents found")
+   }   
+   query = Person{"age": AlgoeDB.MoreThan(25)}
+   results := db.FindMany(query)   
+   if results != nil {
+   	  fmt.Println("results:", results) //results: [map[age:27 name:Billy] map[age:26 name:Carisa]]
+   } else {
+   	  fmt.Println("no documents found")
+   }
 }
 
 ```
