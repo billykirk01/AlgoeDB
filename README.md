@@ -1,5 +1,5 @@
 ## AlgoeDB
-A light, Embeddable, NoSQL database written in Go. 
+A lightweight, persitent, NoSQL database written in Go. 
 
 Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many thanks to [@Kirlovon](https://github.com/Kirlovon) for the inspiration!
 
