@@ -262,7 +262,10 @@ func (d *Database) load() error {
 
 	d.documents = documents
 
-	d.save()
+	err = d.save()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -306,7 +309,6 @@ func searchDocuments(query map[string]interface{}, documents []map[string]interf
 			}
 
 			documentValue := document[key]
-
 			include = matchValues(queryValue, documentValue)
 		}
 
