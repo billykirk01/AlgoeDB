@@ -39,7 +39,7 @@ if result != nil {
     fmt.Println("no documents found")
 }
 
-query = Person{"age": AlgoeDB.MoreThan(25)}
+query = Person{"age": AlgoeDB.MoreThan(25)} //using one of the comparators
 results := db.FindMany(query)
 if results != nil {
     fmt.Println(results) //[map[age:27 name:Billy] map[age:26 name:Carisa]]
