@@ -328,7 +328,6 @@ func (d *Database) searchDocuments(query map[string]interface{}) []int {
 }
 
 func matchValues(queryValue interface{}, documentValue interface{}) bool {
-
 	if queryValue == documentValue {
 		return true
 	}
