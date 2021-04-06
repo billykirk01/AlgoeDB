@@ -50,4 +50,9 @@ if results != nil {
 } else {
     fmt.Println("no documents found")
 }
+
+// other comparators
+query = Person{"name": AlgoeDB.Matches(`B([a-z]+)y`)}
+query = Person{"name": AlgoeDB.Exists()}
+query = Person{"age": AlgoeDB.And(AlgoeDB.MoreThanOrEqual(18), AlgoeDB.LessThan(65))}
 ```
