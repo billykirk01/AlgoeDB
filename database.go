@@ -249,7 +249,6 @@ func (d *Database) load() error {
 }
 
 func (d *Database) save() error {
-
 	if d.config.Path == "" {
 		return nil
 	}
