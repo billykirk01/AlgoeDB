@@ -26,7 +26,6 @@ type SchemaValidator func(document interface{}) bool
 type QueryFunc func(value interface{}) bool
 
 func NewDatabase(config *DatabaseConfig) (*Database, error) {
-
 	documents := []map[string]interface{}{}
 
 	database := Database{
