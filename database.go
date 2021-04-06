@@ -243,7 +243,7 @@ func (d *Database) DeleteMany(query map[string]interface{}) error {
 func (d *Database) load() error {
 	content := "[]"
 
-	if d.config.Path != "" {
+	if !*d.config.OnlyInMemory && d.config.Path != "" {
 		if _, err := os.Stat(d.config.Path); os.IsNotExist(err) {
 			_, err := os.Create(d.config.Path)
 			if err != nil {
