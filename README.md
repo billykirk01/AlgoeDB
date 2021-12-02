@@ -1,7 +1,7 @@
 ## AlgoeDB 🌿
 A lightweight, persistent, NoSQL database written in Go. 
 
-Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many thanks to [@Kirlovon](https://github.com/Kirlovon) for the inspiration!
+Inspired by the Deno project [aloeDB](https://github.com/Kirlovon/AloeDB). Many thanks to [@Kirlovon](https://github.com/Kirlovon) for the inspiration!
 
 ## Features ✨
 * 🎉 Simple to use API, similar to [MongoDB](https://www.mongodb.com/)!
@@ -11,7 +11,7 @@ Inspired by the Deno project [AloeDB](https://github.com/Kirlovon/AloeDB). Many 
 
 ## Importing 📦 
 ```go
-import "github.com/wkirk01/AlgoeDB"
+import "github.com/billykirk01/algoeDB"
 ```
 
 ## Example Usage
